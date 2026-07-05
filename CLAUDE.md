@@ -16,6 +16,8 @@ open .build/FlowState.app
 
 `FlowStateSelfTest` is an assert-based executable, not XCTest. There is no single-test runner yet.
 
+Maintain README documentation in both English and Chinese; when one language changes, update the other in the same PR.
+
 ## Project status
 
 FlowState is a minimal SwiftPM macOS prototype that reads Claude Code hook events from `~/.flowstate/events.jsonl`, shows attention debt in a right-edge hover panel, and jumps back to Warp sessions when available. Build artifacts live under `.build/` and are ignored.
