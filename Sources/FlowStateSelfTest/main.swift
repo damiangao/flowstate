@@ -56,7 +56,7 @@ let terminalEvent = HookEvent.parseLog("{\"session_id\":\"claude-session\",\"hoo
 assert(terminalEvent.terminalApp == "Warp")
 assert(terminalEvent.terminalSessionID == "warp-session")
 
-// --- HookConfig:启动时检查 Stop/Notification hook ---
+// --- HookConfig:启动时检查 Stop/Notification/UserPromptSubmit hook ---
 let goodSettings = """
 {"hooks":{"Stop":[{"hooks":[{"type":"command","command":"/tmp/flowstate-hook.sh"}]}],"Notification":[{"hooks":[{"type":"command","command":"/tmp/flowstate-hook.sh"}]}],"UserPromptSubmit":[{"hooks":[{"type":"command","command":"/tmp/flowstate-hook.sh"}]}]}}
 """

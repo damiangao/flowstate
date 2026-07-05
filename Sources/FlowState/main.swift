@@ -47,7 +47,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 MainActor.assumeIsolated {
     let app = NSApplication.shared
-    app.setActivationPolicy(.accessory)
+    app.setActivationPolicy(.accessory)   // 无 Dock 图标
     let delegate = AppDelegate()
     app.delegate = delegate
     app.run()
