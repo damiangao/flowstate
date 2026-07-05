@@ -1,5 +1,5 @@
 {
-  "_comment": "把 hooks 段合并进 ~/.claude/settings.json。command 必须是绝对路径($HOME/~ 不会被展开),改成你 clone 的实际路径。Stop=干完一轮,Notification=要权限/等输入。",
+  "_comment": "把 hooks 段合并进 ~/.claude/settings.json。command 必须是绝对路径($HOME/~ 不会被展开),改成你 clone 的实际路径。Stop=干完一轮,Notification=要权限/等输入,UserPromptSubmit=新任务清旧状态。",
   "hooks": {
     "Stop": [
       {
@@ -12,6 +12,16 @@
       }
     ],
     "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/damian/workspace/flowstate/hooks/flowstate-hook.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
       {
         "hooks": [
           {

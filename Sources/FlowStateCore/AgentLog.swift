@@ -5,7 +5,7 @@ public enum AgentLog {
         var latest: [String: Agent] = [:]
         for e in events {
             guard let sid = e.sessionID else { continue }
-            if e.hookEventName == "FlowStateClear" {
+            if e.hookEventName == "FlowStateClear" || e.hookEventName == "UserPromptSubmit" {
                 latest.removeValue(forKey: sid)
                 continue
             }

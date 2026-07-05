@@ -7,7 +7,7 @@ let package = Package(
     targets: [
         // 纯逻辑:事件模型 + 状态→图标映射。App 和自测都依赖它。
         .target(name: "FlowStateCore"),
-        // 菜单栏 App。
+        // 右侧贴边 App。
         .executableTarget(
             name: "FlowState",
             dependencies: ["FlowStateCore"]

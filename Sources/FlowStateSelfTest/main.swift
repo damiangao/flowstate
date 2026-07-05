@@ -56,9 +56,9 @@ let terminalEvent = HookEvent.parseLog("{\"session_id\":\"claude-session\",\"hoo
 assert(terminalEvent.terminalApp == "Warp")
 assert(terminalEvent.terminalSessionID == "warp-session")
 
-// --- HookConfig:启动时检查 Stop/Notification hook ---
+// --- HookConfig:启动时检查 Stop/Notification/UserPromptSubmit hook ---
 let goodSettings = """
-{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"/tmp/flowstate-hook.sh"}]}],"Notification":[{"hooks":[{"type":"command","command":"/tmp/flowstate-hook.sh"}]}]}}
+{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"/tmp/flowstate-hook.sh"}]}],"Notification":[{"hooks":[{"type":"command","command":"/tmp/flowstate-hook.sh"}]}],"UserPromptSubmit":[{"hooks":[{"type":"command","command":"/tmp/flowstate-hook.sh"}]}]}}
 """
 assert(HookConfig.status(settingsJSON: goodSettings, fileExists: { _ in true }).ok)
 let missingSettings = """
@@ -82,6 +82,24 @@ let keepTerminalLog = """
 {"session_id":"s","hook_event_name":"Notification","notification_type":"idle_prompt","flowstate_received_at":2}
 """
 assert(AgentLog.fold(HookEvent.parseLog(keepTerminalLog)).first?.terminalSessionID == "warp", "后续事件缺 terminal 时保留旧值")
+let latestSessionLog = """
+{"session_id":"s","hook_event_name":"Stop","flowstate_received_at":1}
+{"session_id":"s","hook_event_name":"Notification","notification_type":"idle_prompt","flowstate_received_at":2}
+"""
+let latestAgents = AgentLog.fold(HookEvent.parseLog(latestSessionLog))
+assert(latestAgents.count == 1, "同 session 只保留一条")
+assert(latestAgents.first?.state == .waiting, "同 session 后续状态覆盖旧状态")
+assert(latestAgents.first?.since.timeIntervalSince1970 == 2, "状态变化时 since 使用最新事件")
+let sameStateLog = """
+{"session_id":"s","hook_event_name":"Notification","notification_type":"idle_prompt","flowstate_received_at":1}
+{"session_id":"s","hook_event_name":"Notification","notification_type":"idle_prompt","flowstate_received_at":2}
+"""
+assert(AgentLog.fold(HookEvent.parseLog(sameStateLog)).first?.since.timeIntervalSince1970 == 1, "同状态事件保留原 since")
+let newPromptLog = """
+{"session_id":"s","hook_event_name":"Stop","flowstate_received_at":1}
+{"session_id":"s","hook_event_name":"UserPromptSubmit","flowstate_received_at":2}
+"""
+assert(AgentLog.fold(HookEvent.parseLog(newPromptLog)).isEmpty, "UserPromptSubmit = 新任务清旧状态")
 
 // --- parseLog:坏行不断流 ---
 let mixed = "{\"session_id\":\"a\",\"hook_event_name\":\"Stop\"}\nGARBAGE\n{\"session_id\":\"b\",\"hook_event_name\":\"Stop\"}"

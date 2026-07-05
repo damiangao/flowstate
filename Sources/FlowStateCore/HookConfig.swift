@@ -3,10 +3,15 @@ import Foundation
 public struct HookStatus: Sendable {
     public let ok: Bool
     public let message: String
+
+    public init(ok: Bool, message: String) {
+        self.ok = ok
+        self.message = message
+    }
 }
 
 public enum HookConfig {
-    private static let events = ["Stop", "Notification"]
+    private static let events = ["Stop", "Notification", "UserPromptSubmit"]
 
     public static func status(settingsJSON: String, fileExists: (String) -> Bool) -> HookStatus {
         guard let data = settingsJSON.data(using: .utf8),

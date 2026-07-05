@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# FlowState 事件通道:Claude Code 的 Stop / Notification hook 触发时调用。
+# FlowState 事件通道:Claude Code 的 Stop / Notification / UserPromptSubmit hook 触发时调用。
 # 只搬运,不解析:把 hook 从 stdin 收到的原始 JSON 附加两个字段(branch、received_at)
 # 后追加一行到 ~/.flowstate/events.jsonl。字段名对错留到真机验证时看,脚本不赌。
 set -euo pipefail
