@@ -16,7 +16,7 @@ open .build/FlowState.app
 
 `FlowStateSelfTest` is an assert-based executable, not XCTest. There is no single-test runner yet.
 
-Maintain README documentation in both English and Chinese; when one language changes, update the other in the same PR.
+Maintain README documentation as two files: `README.md` in English and `README.zh-CN.md` in Chinese. When one changes, update the other in the same PR.
 
 ## Project status
 
