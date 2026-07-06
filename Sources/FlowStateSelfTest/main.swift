@@ -55,6 +55,9 @@ assert(nameEvent(cwd: nil, branch: nil).displayName() == "abcdef12", "都缺 = s
 let terminalEvent = HookEvent.parseLog("{\"session_id\":\"claude-session\",\"hook_event_name\":\"Stop\",\"flowstate_terminal_app\":\"Warp\",\"flowstate_terminal_session_id\":\"warp-session\"}").first!
 assert(terminalEvent.terminalApp == "Warp")
 assert(terminalEvent.terminalSessionID == "warp-session")
+let terminalAppEvent = HookEvent.parseLog("{\"session_id\":\"claude-session\",\"hook_event_name\":\"Stop\",\"flowstate_terminal_app\":\"Terminal\",\"flowstate_terminal_session_id\":\"/dev/ttys003\"}").first!
+assert(terminalAppEvent.terminalApp == "Terminal")
+assert(terminalAppEvent.terminalSessionID == "/dev/ttys003")
 
 // --- HookConfig:启动时检查 Stop/Notification/UserPromptSubmit hook ---
 let goodSettings = """
@@ -81,7 +84,16 @@ let keepTerminalLog = """
 {"session_id":"s","hook_event_name":"Stop","flowstate_terminal_app":"Warp","flowstate_terminal_session_id":"warp","flowstate_received_at":1}
 {"session_id":"s","hook_event_name":"Notification","notification_type":"idle_prompt","flowstate_received_at":2}
 """
-assert(AgentLog.fold(HookEvent.parseLog(keepTerminalLog)).first?.terminalSessionID == "warp", "后续事件缺 terminal 时保留旧值")
+let keepWarpAgent = AgentLog.fold(HookEvent.parseLog(keepTerminalLog)).first
+assert(keepWarpAgent?.terminalApp == "Warp", "后续事件缺 terminal 时保留 Warp")
+assert(keepWarpAgent?.terminalSessionID == "warp", "后续事件缺 terminal 时保留旧值")
+let keepTerminalAppLog = """
+{"session_id":"s","hook_event_name":"Stop","flowstate_terminal_app":"Terminal","flowstate_terminal_session_id":"/dev/ttys003","flowstate_received_at":1}
+{"session_id":"s","hook_event_name":"Notification","notification_type":"idle_prompt","flowstate_received_at":2}
+"""
+let keepTerminalAppAgent = AgentLog.fold(HookEvent.parseLog(keepTerminalAppLog)).first
+assert(keepTerminalAppAgent?.terminalApp == "Terminal", "后续事件缺 terminal 时保留 Terminal.app")
+assert(keepTerminalAppAgent?.terminalSessionID == "/dev/ttys003", "Terminal.app 用 tty 作为 terminal id")
 let latestSessionLog = """
 {"session_id":"s","hook_event_name":"Stop","flowstate_received_at":1}
 {"session_id":"s","hook_event_name":"Notification","notification_type":"idle_prompt","flowstate_received_at":2}

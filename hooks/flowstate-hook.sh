@@ -25,6 +25,18 @@ if [ -n "${WARP_TERMINAL_SESSION_UUID:-}" ]; then
 elif [ -n "${WARP_SESSION_ID:-}" ]; then
   terminal_app="Warp"
   terminal_session_id="$WARP_SESSION_ID"
+elif [ "${TERM_PROGRAM:-Apple_Terminal}" = "Apple_Terminal" ]; then
+  tty_path="$(tty </dev/tty 2>/dev/null || true)"
+  if [[ "$tty_path" != /dev/ttys* ]]; then
+    parent_tty="$(ps -p "$PPID" -o tty= 2>/dev/null | tr -d ' ' || true)"
+    if [[ "$parent_tty" == ttys* ]]; then
+      tty_path="/dev/$parent_tty"
+    fi
+  fi
+  if [[ "$tty_path" == /dev/ttys* ]]; then
+    terminal_app="Terminal"
+    terminal_session_id="$tty_path"
+  fi
 fi
 
 # 把原始 JSON 原样保留,附加 branch、终端 session 和一个接收时间戳(hook 未必都带时间)。

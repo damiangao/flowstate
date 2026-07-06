@@ -188,6 +188,8 @@ cat > "$CONTENTS/Info.plist" <<'PLIST'
   <string>13.0</string>
   <key>LSUIElement</key>
   <true/>
+  <key>NSAppleEventsUsageDescription</key>
+  <string>FlowState uses Apple Events to jump back to the Terminal tab that needs your attention.</string>
   <key>NSHighResolutionCapable</key>
   <true/>
 </dict>

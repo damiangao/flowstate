@@ -20,7 +20,7 @@ Maintain README documentation as two files: `README.md` in English and `README.z
 
 ## Project status
 
-FlowState is a minimal SwiftPM macOS prototype that reads Claude Code hook events from `~/.flowstate/events.jsonl`, shows attention debt in a right-edge hover panel, and jumps back to Warp sessions when available. Build artifacts live under `.build/` and are ignored.
+FlowState is a minimal SwiftPM macOS prototype that reads Claude Code hook events from `~/.flowstate/events.jsonl`, shows attention debt in a right-edge hover panel, and jumps back to supported terminal sessions when available. Build artifacts live under `.build/` and are ignored.
 
 ## What FlowState is
 
@@ -40,12 +40,12 @@ Mental model: an **Attention Scheduler / Attention Runtime**, NOT a chat app, da
 - `Sources/FlowState/` is the AppKit executable:
   - `EventStore` polls the events file once per second and publishes folded agents.
   - `EdgePanelController` owns the borderless right-edge panel. The collapsed strip expands on hover into the agent list and can be dragged vertically.
-  - `main.swift` wires the store to the panel and keeps the current Warp-only jump behavior.
+  - `main.swift` wires the store to the panel and keeps the current Warp/Terminal.app jump behavior.
 - `scripts/build-app.sh` wraps the SwiftPM release executable into `.build/FlowState.app` and can optionally install/open it and merge FlowState hooks.
-- `hooks/flowstate-hook.sh` appends Claude hook payloads to `~/.flowstate/events.jsonl`, adding branch and Warp terminal session metadata.
+- `hooks/flowstate-hook.sh` appends Claude hook payloads to `~/.flowstate/events.jsonl`, adding branch and Warp/Terminal.app terminal session metadata.
 - `settings-snippet.json` shows the Claude Code hook configuration needed to feed the app.
 
-The current terminal jump support is intentionally Warp-only. Terminal.app, iTerm2, and Ghostty support are deferred.
+Terminal jump support covers Warp and Terminal.app. iTerm2 and Ghostty support are deferred.
 
 ## Design constraints (from SPARK.md)
 
