@@ -41,4 +41,4 @@ FlowState needs Claude Code `Stop`, `Notification`, and `UserPromptSubmit` hooks
 
 The installer preserves other hooks in `~/.claude/settings.json` and writes a backup to `~/.claude/settings.json.bak`.
 
-FlowState can jump back to the originating Warp session or Terminal.app tab when the terminal is still open.
+FlowState can jump back to the originating terminal session when it is still open. Warp, Terminal.app, and iTerm2 jump to the exact tab/session.

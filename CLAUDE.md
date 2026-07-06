@@ -45,7 +45,7 @@ Mental model: an **Attention Scheduler / Attention Runtime**, NOT a chat app, da
 - `hooks/flowstate-hook.sh` appends Claude hook payloads to `~/.flowstate/events.jsonl`, adding branch and Warp/Terminal.app terminal session metadata.
 - `settings-snippet.json` shows the Claude Code hook configuration needed to feed the app.
 
-Terminal jump support covers Warp and Terminal.app. iTerm2 and Ghostty support are deferred.
+Terminal jump support covers Warp, Terminal.app, and iTerm2 (exact tab/session). Ghostty is deferred: it exposes no per-surface id to the shell, and the title bridge is unusable because Claude occupies the tty during a session.
 
 ## Design constraints (from SPARK.md)
 

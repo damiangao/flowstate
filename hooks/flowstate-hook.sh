@@ -17,6 +17,18 @@ if [ -n "$cwd" ] && [ -d "$cwd" ]; then
   branch="$(git -C "$cwd" branch --show-current 2>/dev/null || true)"
 fi
 
+# 当前 tty,Terminal.app 定位靠它;经 hook 调用时 stdin 非 tty,退回父进程的。
+resolve_tty() {
+  local t
+  t="$(tty </dev/tty 2>/dev/null || true)"
+  if [[ "$t" != /dev/ttys* ]]; then
+    local parent
+    parent="$(ps -p "$PPID" -o tty= 2>/dev/null | tr -d ' ' || true)"
+    [[ "$parent" == ttys* ]] && t="/dev/$parent"
+  fi
+  [[ "$t" == /dev/ttys* ]] && printf '%s' "$t"
+}
+
 terminal_app=""
 terminal_session_id=""
 if [ -n "${WARP_TERMINAL_SESSION_UUID:-}" ]; then
@@ -25,15 +37,13 @@ if [ -n "${WARP_TERMINAL_SESSION_UUID:-}" ]; then
 elif [ -n "${WARP_SESSION_ID:-}" ]; then
   terminal_app="Warp"
   terminal_session_id="$WARP_SESSION_ID"
+elif [ "${TERM_PROGRAM:-}" = "iTerm.app" ] && [ -n "${ITERM_SESSION_ID:-}" ]; then
+  # ITERM_SESSION_ID = w0t0p0:GUID,冒号后的 GUID 即 AppleScript session 的 id。
+  terminal_app="iTerm"
+  terminal_session_id="${ITERM_SESSION_ID##*:}"
 elif [ "${TERM_PROGRAM:-Apple_Terminal}" = "Apple_Terminal" ]; then
-  tty_path="$(tty </dev/tty 2>/dev/null || true)"
-  if [[ "$tty_path" != /dev/ttys* ]]; then
-    parent_tty="$(ps -p "$PPID" -o tty= 2>/dev/null | tr -d ' ' || true)"
-    if [[ "$parent_tty" == ttys* ]]; then
-      tty_path="/dev/$parent_tty"
-    fi
-  fi
-  if [[ "$tty_path" == /dev/ttys* ]]; then
+  tty_path="$(resolve_tty)"
+  if [ -n "$tty_path" ]; then
     terminal_app="Terminal"
     terminal_session_id="$tty_path"
   fi

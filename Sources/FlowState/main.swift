@@ -38,6 +38,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if activateTerminal(tty: tty) {
                 store.clear(agent)
             }
+        case ("iTerm", let sid?) where !sid.isEmpty:
+            if activateITerm(sessionID: sid) {
+                store.clear(agent)
+            }
         default:
             FileHandle.standardError.write(
                 "[FlowState] no terminal session for agent=\(agent.id)\n".data(using: .utf8)!)
@@ -73,11 +77,42 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         end tell
         return false
         """
+        return runAppleScript(script, context: "Terminal")
+    }
+
+    /// iTerm2 每个 session 有稳定 id(= ITERM_SESSION_ID 冒号后的 GUID),按它选中并激活。
+    private func activateITerm(sessionID: String) -> Bool {
+        let quoted = sessionID
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+        let script = """
+        tell application "iTerm2"
+            repeat with aWindow in windows
+                repeat with aTab in tabs of aWindow
+                    repeat with aSession in sessions of aTab
+                        if id of aSession is "\(quoted)" then
+                            select aWindow
+                            select aTab
+                            select aSession
+                            activate
+                            return true
+                        end if
+                    end repeat
+                end repeat
+            end repeat
+            activate
+        end tell
+        return false
+        """
+        return runAppleScript(script, context: "iTerm")
+    }
+
+    private func runAppleScript(_ script: String, context: String) -> Bool {
         var error: NSDictionary?
         let result = NSAppleScript(source: script)?.executeAndReturnError(&error)
         if let error {
             FileHandle.standardError.write(
-                "[FlowState] Terminal jump failed: \(error)\n".data(using: .utf8)!)
+                "[FlowState] \(context) jump failed: \(error)\n".data(using: .utf8)!)
         }
         return result?.booleanValue == true
     }
