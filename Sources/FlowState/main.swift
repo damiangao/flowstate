@@ -29,19 +29,57 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         edgePanel.render(agents: agents, hookStatus: hookStatus)
     }
 
-    /// 点一个 agent = 跳到它的 Warp pane。注意 Claude session_id 不是 terminal session_id。
-    /// Warp 的 warp://session/ 要 32 字符纯 hex(无连字符),标准 UUID 得先去掉 -。
+    /// 点一个 agent = 跳回它所在的终端会话。Claude session_id 不是 terminal session_id。
     private func jump(_ agent: Agent) {
-        guard agent.terminalApp == "Warp", let sid = agent.terminalSessionID, !sid.isEmpty else {
+        switch (agent.terminalApp, agent.terminalSessionID) {
+        case ("Warp", let sid?) where !sid.isEmpty:
+            jumpToWarp(agent, sid)
+        case ("Terminal", let tty?) where !tty.isEmpty:
+            if activateTerminal(tty: tty) {
+                store.clear(agent)
+            }
+        default:
             FileHandle.standardError.write(
                 "[FlowState] no terminal session for agent=\(agent.id)\n".data(using: .utf8)!)
             NSApp.activate(ignoringOtherApps: true)
-            return
         }
+    }
+
+    /// Warp 的 warp://session/ 要 32 字符纯 hex(无连字符),标准 UUID 得先去掉 -。
+    private func jumpToWarp(_ agent: Agent, _ sid: String) {
         let hex = sid.replacingOccurrences(of: "-", with: "")
         guard let url = URL(string: "warp://session/\(hex)") else { return }
         store.clear(agent)
         NSWorkspace.shared.open(url)
+    }
+
+    private func activateTerminal(tty: String) -> Bool {
+        let quotedTTY = tty
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+        let script = """
+        tell application "Terminal"
+            repeat with terminalWindow in windows
+                repeat with terminalTab in tabs of terminalWindow
+                    if tty of terminalTab is "\(quotedTTY)" then
+                        set selected tab of terminalWindow to terminalTab
+                        set index of terminalWindow to 1
+                        activate
+                        return true
+                    end if
+                end repeat
+            end repeat
+            activate
+        end tell
+        return false
+        """
+        var error: NSDictionary?
+        let result = NSAppleScript(source: script)?.executeAndReturnError(&error)
+        if let error {
+            FileHandle.standardError.write(
+                "[FlowState] Terminal jump failed: \(error)\n".data(using: .utf8)!)
+        }
+        return result?.booleanValue == true
     }
 }
 

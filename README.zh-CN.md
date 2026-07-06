@@ -40,3 +40,5 @@ FlowState 需要 Claude Code 的 `Stop`、`Notification` 和 `UserPromptSubmit` 
 ```
 
 安装脚本会保留 `~/.claude/settings.json` 里的其他 hooks，并备份到 `~/.claude/settings.json.bak`。
+
+当原终端仍打开时，FlowState 可以跳回对应的 Warp session 或 Terminal.app 标签页。
