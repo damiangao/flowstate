@@ -41,4 +41,13 @@ FlowState 需要 Claude Code 的 `Stop`、`Notification` 和 `UserPromptSubmit` 
 
 安装脚本会保留 `~/.claude/settings.json` 里的其他 hooks，并备份到 `~/.claude/settings.json.bak`。
 
-当原终端仍打开时，FlowState 可以跳回对应的终端会话。Warp、Terminal.app 和 iTerm2 会精确跳到具体标签页/会话。
+## 终端跳转
+
+当某个 agent 需要你时，在面板上点它就能跳回它所在的终端标签页——只要那个标签页还开着。
+
+| 终端 | 跳转精度 | 定位方式 |
+| --- | --- | --- |
+| Warp | 精确到 session | `warp://session/<uuid>` |
+| Terminal.app | 精确到标签页 | AppleScript 按 tty 匹配 |
+| iTerm2 | 精确到 session | AppleScript 按 `ITERM_SESSION_ID` 的 GUID 匹配 |
+| Ghostty | 不支持 | 未向 shell 暴露 per-surface id |

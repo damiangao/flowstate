@@ -41,4 +41,13 @@ FlowState needs Claude Code `Stop`, `Notification`, and `UserPromptSubmit` hooks
 
 The installer preserves other hooks in `~/.claude/settings.json` and writes a backup to `~/.claude/settings.json.bak`.
 
-FlowState can jump back to the originating terminal session when it is still open. Warp, Terminal.app, and iTerm2 jump to the exact tab/session.
+## Terminal jump
+
+When an agent needs you, click it in the panel to jump back to the terminal tab it is running in — as long as that tab is still open.
+
+| Terminal | Jump precision | How it maps |
+| --- | --- | --- |
+| Warp | Exact session | `warp://session/<uuid>` |
+| Terminal.app | Exact tab | AppleScript match by tty |
+| iTerm2 | Exact session | AppleScript match by `ITERM_SESSION_ID` GUID |
+| Ghostty | Not supported | no per-surface id exposed to the shell |
