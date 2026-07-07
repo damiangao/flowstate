@@ -6,6 +6,8 @@
 
 ## 这是什么
 
+AI 的真正瓶颈，在于人类的注意力。
+
 当你同时跑很多个 Claude Code 会话时，它们会在不同时刻各自干完、卡住、等你。你会忘掉已经干完的，漏掉卡在权限确认上的，在一个 agent 上耗掉半小时，而另外十个正干等着。FlowState 是一条钉在屏幕右缘的窄面板，只回答一个问题：**此刻什么最值得我关注？**
 
 它是 [Claude Code](https://docs.claude.com/en/docs/claude-code) 的伴侣——读取 Claude Code 的 hook 事件，自己不产生任何数据。不支持其他 agent 运行器。
