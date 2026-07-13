@@ -10,9 +10,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var cancellable: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        edgePanel = EdgePanelController { [weak self] agent in
-            self?.jump(agent)
-        }
+        edgePanel = EdgePanelController(
+            onSelect: { [weak self] agent in self?.jump(agent) },
+            onClearAll: { [weak self] in self?.store.clearAll() }
+        )
 
         cancellable = store.$agents.sink { [weak self] agents in
             self?.render(agents)

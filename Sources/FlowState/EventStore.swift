@@ -32,8 +32,21 @@ final class EventStore: ObservableObject {
     }
 
     func clear(_ agent: Agent) {
-        let line = "{\"session_id\":\"\(agent.id)\",\"hook_event_name\":\"FlowStateClear\",\"flowstate_received_at\":\(Int(Date().timeIntervalSince1970))}\n"
-        if let data = line.data(using: .utf8), let handle = try? FileHandle(forWritingTo: fileURL) {
+        append(clearLine(for: agent.id))
+    }
+
+    /// 一键清空:给当前每个 agent 各追加一条 FlowStateClear,一次写入。
+    func clearAll() {
+        guard !agents.isEmpty else { return }
+        append(agents.map { clearLine(for: $0.id) }.joined())
+    }
+
+    private func clearLine(for sessionID: String) -> String {
+        "{\"session_id\":\"\(sessionID)\",\"hook_event_name\":\"FlowStateClear\",\"flowstate_received_at\":\(Int(Date().timeIntervalSince1970))}\n"
+    }
+
+    private func append(_ text: String) {
+        if let data = text.data(using: .utf8), let handle = try? FileHandle(forWritingTo: fileURL) {
             defer { try? handle.close() }
             _ = try? handle.seekToEnd()
             _ = try? handle.write(contentsOf: data)
