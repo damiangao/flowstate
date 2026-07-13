@@ -80,6 +80,14 @@ let clearLog = """
 {"session_id":"s","hook_event_name":"FlowStateClear","flowstate_received_at":2}
 """
 assert(AgentLog.fold(HookEvent.parseLog(clearLog)).isEmpty, "FlowStateClear = 清掉该 session")
+// 一键清空:每个 session 各一条 FlowStateClear,全部清空
+let clearAllLog = """
+{"session_id":"a","hook_event_name":"Stop","flowstate_received_at":1}
+{"session_id":"b","hook_event_name":"Notification","notification_type":"idle_prompt","flowstate_received_at":2}
+{"session_id":"a","hook_event_name":"FlowStateClear","flowstate_received_at":3}
+{"session_id":"b","hook_event_name":"FlowStateClear","flowstate_received_at":3}
+"""
+assert(AgentLog.fold(HookEvent.parseLog(clearAllLog)).isEmpty, "一键清空 = 每个 session 各一条 FlowStateClear")
 let keepTerminalLog = """
 {"session_id":"s","hook_event_name":"Stop","flowstate_terminal_app":"Warp","flowstate_terminal_session_id":"warp","flowstate_received_at":1}
 {"session_id":"s","hook_event_name":"Notification","notification_type":"idle_prompt","flowstate_received_at":2}

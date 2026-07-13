@@ -22,7 +22,7 @@ final class EdgePanelController {
     }()
     private var dragOffsetY: CGFloat = 0
 
-    init(onSelect: @escaping (Agent) -> Void) {
+    init(onSelect: @escaping (Agent) -> Void, onClearAll: @escaping () -> Void) {
         edgeView = EdgePanelView()
         panel = NSPanel(
             contentRect: .zero,
@@ -43,6 +43,7 @@ final class EdgePanelController {
         edgeView.onMouseDown = { [weak self] y in self?.beginDrag(mouseY: y) }
         edgeView.onDrag = { [weak self] y in self?.drag(toMouseY: y) }
         edgeView.onSelect = onSelect
+        edgeView.onClearAll = onClearAll
         edgeView.onQuit = { NSApp.terminate(nil) }
 
         render(agents: [], hookStatus: hookStatus)
@@ -145,6 +146,7 @@ private final class EdgePanelView: NSView {
     var onMouseDown: ((CGFloat) -> Void)?
     var onDrag: ((CGFloat) -> Void)?
     var onSelect: ((Agent) -> Void)?
+    var onClearAll: (() -> Void)?
     var onQuit: (() -> Void)?
 
     private var tracking: NSTrackingArea?
@@ -259,10 +261,18 @@ private final class EdgePanelView: NSView {
             agents.forEach { list.addArrangedSubview(row(for: $0)) }
         }
 
-        let quit = NSButton(title: "退出 FlowState", target: self, action: #selector(quitClicked))
-        quit.bezelStyle = .inline
-        quit.alignment = .left
-        list.addArrangedSubview(quit)
+        let footer = NSStackView()
+        footer.orientation = .horizontal
+        footer.spacing = 4
+        if !agents.isEmpty {
+            footer.addArrangedSubview(iconButton(
+                symbol: "trash", tooltip: "清空全部",
+                action: #selector(clearAllClicked), color: .secondaryLabelColor))
+        }
+        footer.addArrangedSubview(iconButton(
+            symbol: "power", tooltip: "退出 FlowState",
+            action: #selector(quitClicked), color: .systemRed))
+        list.addArrangedSubview(footer)
     }
 
     private func row(for agent: Agent) -> NSView {
@@ -309,7 +319,22 @@ private final class EdgePanelView: NSView {
         return debt > 0 && hookStatus.ok ? "FS\n\(glyph)\(debt)" : "FS\n\(glyph)"
     }
 
+    private func iconButton(symbol: String, tooltip: String, action: Selector, color: NSColor) -> NSButton {
+        let button = NSButton(title: "", target: self, action: action)
+        button.image = NSImage(systemSymbolName: symbol, accessibilityDescription: tooltip)?
+            .withSymbolConfiguration(.init(pointSize: 15, weight: .regular))
+        button.contentTintColor = color
+        button.isBordered = false
+        button.bezelStyle = .regularSquare
+        button.toolTip = tooltip
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.widthAnchor.constraint(equalToConstant: 34).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 28).isActive = true
+        return button
+    }
+
     @objc private func agentClicked(_ sender: AgentButton) { onSelect?(sender.agent) }
+    @objc private func clearAllClicked() { onClearAll?() }
     @objc private func quitClicked() { onQuit?() }
 
     private func nsColor(_ c: IconColor) -> NSColor {
